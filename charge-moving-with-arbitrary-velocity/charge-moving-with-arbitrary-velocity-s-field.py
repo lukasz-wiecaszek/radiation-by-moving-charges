@@ -45,10 +45,10 @@ if (ellipse.max_linear_velocity() >= c):
 t_values = np.linspace(0.0, np.reciprocal(args.frequency), frames)
 
 # Calculate the ellipse curve points
-ellipse_points = ellipse.position(t_values)
+ellipse_points = ellipse.parametric_equation(t_values)
 
 dt = 3 * np.reciprocal(args.frequency) / frames
-q = charge.ChargeMovingWithArbitraryVelocity(ellipse.position, dt)
+q = charge.ChargeMovingWithArbitraryVelocity(ellipse.parametric_equation, dt)
 fields = Fields([q])
 
 X, Y, Z = np.meshgrid(
