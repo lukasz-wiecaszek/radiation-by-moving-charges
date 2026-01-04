@@ -13,7 +13,7 @@ from utils import *
 from charge import *
 from fields import *
 
-charge = __import__("oscillating-charge")
+charge = __import__("oscillating-single-charge")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--animation",
@@ -111,10 +111,10 @@ def update(frame):
 if args.animation:
     animation = mpla.FuncAnimation(fig, update, interval = 1000 / fps, frames = frames)
     animation.save(
-        f"oscillating-charge-s-field-{args.frequency:.2e}Hz.mp4",
+        f"oscillating-single-charge-s-field-{args.frequency:.2e}Hz.mp4",
         writer = mpla.FFMpegWriter(fps = fps))
 else:
     plt.savefig(
-        f"oscillating-charge-s-field-{args.frequency:.2e}Hz.png",
+        f"oscillating-single-charge-s-field-{args.frequency:.2e}Hz.png",
         format = "png", bbox_inches="tight")
     plt.show()

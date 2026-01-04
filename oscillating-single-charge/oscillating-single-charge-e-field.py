@@ -13,11 +13,14 @@ from utils import *
 from charge import *
 from fields import *
 
-charge = __import__("oscillating-charge")
+charge = __import__("oscillating-single-charge")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--animation",
     help="generate animation",
+    action="store_true")
+parser.add_argument("-q", "--quiver",
+    help="show quiver",
     action="store_true")
 parser.add_argument("-m", "--amplitude",
     help="amplitude/magnitude of the oscillation",
@@ -29,6 +32,10 @@ args = parser.parse_args()
 
 range = 0.5e0 # 50 cm
 npoints = 200 + 1
+
+if args.quiver:
+    qrange = 0.5e0 # 50 cm
+    qnpoints = 20 + 1
 
 fps = 25
 duration = 30 # in seconds
@@ -56,6 +63,13 @@ X, Y, Z = np.meshgrid(
     np.array([0]))
 grid = np.stack([X.ravel(), Y.ravel(), Z.ravel()], axis = 1)
 
+if args.quiver:
+    QX, QY, QZ = np.meshgrid(
+        np.linspace(-qrange, +qrange, qnpoints),
+        np.linspace(-qrange, +qrange, qnpoints),
+        np.array([0]))
+    qgrid = np.stack([QX.ravel(), QY.ravel(), QZ.ravel()], axis = 1)
+
 fig, ax = plt.subplots(figsize=(8, 8))
 
 t = 0
@@ -78,21 +92,27 @@ if args.animation:
     time = ax.annotate(0, xy=annotate_coords.get(), color="white")
     time.set_text(f"t = {t:.2e} s")
 
-B_field = fields.B(grid, t)
-B_field_magnitude = np.array([np.linalg.norm(B) for B in B_field]).reshape((npoints, npoints))
-print("B min: " + str(np.min(B_field_magnitude)))
-print("B max: " + str(np.max(B_field_magnitude)))
+E_field = fields.E(grid, t)
+E_field_magnitude = np.array([np.linalg.norm(E) for E in E_field]).reshape((npoints, npoints))
+print("E min: " + str(np.min(E_field_magnitude)))
+print("E max: " + str(np.max(E_field_magnitude)))
 
-im = ax.imshow(B_field_magnitude, origin="lower",
+im = ax.imshow(E_field_magnitude, origin="lower",
                 extent=[-range, range, -range, range])
-im.set_norm(mpl.colors.LogNorm(vmin=1e-20, vmax=1e-14))
+im.set_norm(mpl.colors.LogNorm(vmin=1e-9, vmax=1e-3))
 
 plt.xticks([-range, -range/2, 0, range/2, range])
 plt.yticks([-range, -range/2, 0, range/2, range])
 plt.xlabel("$x$ [m]")
 plt.ylabel("$y$ [m]")
 colorbar = fig.colorbar(im, fraction=0.046, pad = 0.04)
-colorbar.ax.set_ylabel("$|\\mathbf{B}|$ [T]", rotation=270, labelpad=12)
+colorbar.ax.set_ylabel("$|\\mathbf{E}|$ [V/m]", rotation=270, labelpad=12)
+
+if args.quiver:
+    E_field = fields.E(qgrid, t)
+    Ex = np.array([E[0] for E in E_field])
+    Ey = np.array([E[1] for E in E_field])
+    quiver = ax.quiver(QX, QY, Ex, Ey, scale = 3e-6)
 
 dt = 10 * np.reciprocal(args.frequency) / frames
 def update(frame):
@@ -104,17 +124,23 @@ def update(frame):
     scatter.set_offsets([q.position(t)[0], q.position(t)[1]])
     time.set_text(f"t = {t:.2e} s")
 
-    B_field = fields.B(grid, t)
-    B_field_magnitude = np.array([np.linalg.norm(B) for B in B_field]).reshape((npoints, npoints))
-    im.set_data(B_field_magnitude)
+    E_field = fields.E(grid, t)
+    E_field_magnitude = np.array([np.linalg.norm(E) for E in E_field]).reshape((npoints, npoints))
+    im.set_data(E_field_magnitude)
+
+    if args.quiver:
+        E_field = fields.E(qgrid, t)
+        Ex = np.array([E[0] for E in E_field])
+        Ey = np.array([E[1] for E in E_field])
+        quiver.set_UVC(Ex, Ey)
 
 if args.animation:
     animation = mpla.FuncAnimation(fig, update, interval = 1000 / fps, frames = frames)
     animation.save(
-        f"oscillating-charge-b-field-{args.frequency:.2e}Hz.mp4",
+        f"oscillating-single-charge-e-field-{args.frequency:.2e}Hz.mp4",
         writer = mpla.FFMpegWriter(fps = fps))
 else:
     plt.savefig(
-        f"oscillating-charge-b-field-{args.frequency:.2e}Hz.png",
+        f"oscillating-single-charge-e-field-{args.frequency:.2e}Hz.png",
         format = "png", bbox_inches="tight")
     plt.show()
