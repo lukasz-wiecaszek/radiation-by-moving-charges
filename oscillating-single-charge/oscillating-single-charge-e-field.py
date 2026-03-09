@@ -13,7 +13,7 @@ from utils import *
 from charge import *
 from fields import *
 
-charge = __import__("oscillating-single-charge")
+charge = __import__("oscillating-charge")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-a", "--animation",
