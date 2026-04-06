@@ -34,7 +34,7 @@ class Fields():
 
         Notes
         -----
-        Please see "Radiation By Moving Charges.pdf,
+        Please see "Radiation From Moving Charges.pdf,
         chapter 4, 'Fields of a point charge moving with arbitrary velocity'
         and especially equations (4.51, 4.52 and 4.53)."
         """
