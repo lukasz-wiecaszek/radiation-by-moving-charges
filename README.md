@@ -11,3 +11,5 @@ Charge configurations which are covered by the article and python program are:
 - Charge moving with constant angular velocity
 - Oscillating single charge
 - Oscillating electric dipole
+
+![](oscillating-electric-dipole/oscillating-electric-dipole-b-field-1.20e+08Hz.png)
